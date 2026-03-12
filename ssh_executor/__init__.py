@@ -9,6 +9,7 @@ SSH 执行器包
 
 # 显式导入核心类
 from ssh_executor.core.connection import SSHConnection, SSHConnectionManager, get_global_manager, shutdown_global_manager
+from ssh_executor.core.executor import SSHCommandExecutor, get_global_executor, shutdown_global_executor
 from ssh_executor.models.config import (
     SSHConnectionConfig, 
     SSHAuthConfig, 
@@ -38,6 +39,9 @@ __all__ = [
     # Core
     "SSHConnection",
     "SSHConnectionManager",
+    "SSHCommandExecutor",
+    "get_global_executor",
+    "shutdown_global_executor",
     "get_global_manager",
     "shutdown_global_manager",
     

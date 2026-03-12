@@ -223,3 +223,24 @@ def get_local_ip() -> str:
         return ip
     except:
         return "127.0.0.1"
+import time
+
+def format_duration(seconds: float) -> str:
+    """格式化持续时间
+    
+    Args:
+        seconds: 秒数
+        
+    Returns:
+        str: 格式化后的时间字符串
+    """
+    if seconds < 1:
+        return f"{seconds*1000:.1f}ms"
+    elif seconds < 60:
+        return f"{seconds:.2f}s"
+    elif seconds < 3600:
+        minutes = seconds / 60
+        return f"{minutes:.1f}m"
+    else:
+        hours = seconds / 3600
+        return f"{hours:.1f}h"
