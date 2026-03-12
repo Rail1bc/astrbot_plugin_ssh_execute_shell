@@ -1,0 +1,161 @@
+# SSH Execute Shell 插件配置示例
+
+# SSH 连接配置
+ssh_connections:
+  # 生产服务器
+  production:
+    host: "192.168.1.100"
+    port: 22
+    username: "root"
+    auth_type: "key"  # password / key / agent
+    key_path: "/home/user/.ssh/id_rsa"
+    # password: "your_password"  # 如果使用密码认证
+    timeout: 30
+    description: "生产环境主服务器"
+  
+  # 测试服务器
+  testing:
+    host: "192.168.1.101"
+    port: 22
+    username: "admin"
+    auth_type: "password"
+    password: "${ENV_SSH_PASSWORD}"  # 支持环境变量
+    timeout: 15
+    description: "测试环境服务器"
+  
+  # 远程云服务器
+  cloud_server:
+    host: "117.72.179.121"
+    port: 22
+    username: "root"
+    auth_type: "key"
+    key_path: "/home/user/.ssh/cloud_key"
+    timeout: 45
+    description: "腾讯云服务器"
+
+# 连接池配置
+connection_pool:
+  max_size: 10                     # 最大连接数
+  max_idle_time: 300              # 最大空闲时间（秒）
+  health_check_interval: 60       # 健康检查间隔（秒）
+  reconnect_attempts: 3           # 重连尝试次数
+  reconnect_delay: 5              # 重连延迟（秒）
+
+# 缓存配置
+cache:
+  enabled: true                   # 是否启用缓存
+  default_ttl: 60                 # 默认缓存时间（秒）
+  max_size: 1000                  # 最大缓存条目数
+  cacheable_commands:             # 可缓存的命令模式
+    - "echo *"
+    - "date"
+    - "uname *"
+    - "uptime"
+    - "df *"
+    - "free *"
+    - "ls *"
+
+# 性能优化配置
+performance:
+  batch_execution: true           # 启用批量执行
+  parallel_execution: true        # 启用并行执行
+  max_parallel: 5                 # 最大并行数
+  command_timeout: 30             # 命令超时时间（秒）
+  connection_timeout: 10          # 连接超时时间（秒）
+
+# 安全配置
+security:
+  verify_host_keys: false         # 是否验证主机密钥（生产环境建议开启）
+  known_hosts_file: "/home/user/.ssh/known_hosts"
+  strict_host_key_checking: false # 严格的主机密钥检查
+  allow_agent_forwarding: false   # 是否允许代理转发
+  allow_tcp_forwarding: false     # 是否允许TCP转发
+
+# 日志配置
+logging:
+  level: "INFO"                   # 日志级别: DEBUG, INFO, WARNING, ERROR
+  log_file: "/var/log/ssh_executor.log"
+  max_file_size: 10485760         # 最大日志文件大小（10MB）
+  backup_count: 5                 # 备份文件数量
+  log_format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+
+# 监控配置
+monitoring:
+  enabled: true                   # 是否启用监控
+  metrics_port: 9090              # 监控指标端口
+  collect_interval: 30            # 收集间隔（秒）
+  metrics_to_collect:
+    - "connection_count"
+    - "command_execution_time"
+    - "cache_hit_rate"
+    - "error_rate"
+    - "throughput"
+
+# 插件特定配置
+plugin:
+  command_prefix: "/ssh"          # 命令前缀
+  default_host: "production"      # 默认主机
+  allow_public_access: false      # 是否允许公开访问
+  admin_users:                    # 管理员用户列表
+    - "user1"
+    - "user2"
+  
+  # 命令别名
+  command_aliases:
+    status: "uptime && df -h && free -h"
+    restart_nginx: "systemctl restart nginx"
+    check_logs: "tail -100 /var/log/syslog"
+  
+  # 自动任务
+  scheduled_tasks:
+    - name: "daily_backup_check"
+      cron: "0 2 * * *"           # 每天凌晨2点
+      command: "check_backup_status.sh"
+      host: "production"
+    
+    - name: "disk_space_monitor"
+      cron: "*/30 * * * *"        # 每30分钟
+      command: "df -h /"
+      host: "all"                 # 在所有主机上执行
+
+# 高级配置
+advanced:
+  # SSH 选项
+  ssh_options:
+    Compression: "yes"
+    ServerAliveInterval: 60
+    ServerAliveCountMax: 3
+    TCPKeepAlive: "yes"
+  
+  # 代理设置
+  proxy:
+    enabled: false
+    type: "http"                  # http / socks5
+    host: "proxy.example.com"
+    port: 8080
+    username: ""
+    password: ""
+  
+  # 跳板机配置
+  jump_host:
+    enabled: false
+    host: "jump.example.com"
+    port: 22
+    username: "jump_user"
+    auth_type: "key"
+    key_path: "/path/to/jump_key"
+  
+  # 自定义环境变量
+  environment:
+    PATH: "/usr/local/bin:/usr/bin:/bin"
+    LANG: "en_US.UTF-8"
+    LC_ALL: "en_US.UTF-8"
+
+# 示例：如何在不同环境中使用
+# 开发环境 - 使用较低的连接池大小和较短的超时
+# 生产环境 - 使用较大的连接池和较长的超时
+# 测试环境 - 禁用缓存以便每次获取最新数据
+
+# 配置验证规则
+# 注意：实际使用时应确保密码和密钥的安全存储
+# 建议使用环境变量或密钥管理服务来存储敏感信息
