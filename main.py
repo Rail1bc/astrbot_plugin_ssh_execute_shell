@@ -8,10 +8,21 @@ from astrbot.api import logger
 
 MAX_OUTPUT_LEN = 6000
 
+# —— 管理员校验函数（仿照 astrbot 本体 shell 工具的 check_admin_permission 逻辑） ——
+def _check_admin(event: AstrMessageEvent, operation_name: str) -> str | None:
+    """检查当前用户是否为管理员。如果不是，返回错误提示；是则返回 None。"""
+    if not event.is_admin():
+        return (
+            f"❌ 权限不足：{operation_name} 仅允许管理员使用。\n"
+            f"如需授权，请管理在 AstrBot WebUI → 配置 → 基础配置 中添加您的用户ID到管理员列表。\n"
+            f"您的用户ID是：{event.get_sender_id()}"
+        )
+    return None
 
-@register("astrbot_plugin_ssh_execute_shell", "Rail1bc, 寒露", "通过SSH在远程服务器上执行Shell命令", "1.0.0")
+
+@register("astrbot_plugin_ssh_execute_shell", "Rail1bc, 寒露", "通过SSH在远程服务器上执行Shell命令（仅管理员）", "1.1.0")
 class SSHExecuteShellPlugin(Star):
-    """通过持久 bash session 在远程服务器上执行 Shell 命令。"""
+    """通过持久 bash session 在远程服务器上执行 Shell 命令。（仅管理员可用）"""
 
     def __init__(self, context: Context, config=None):
         super().__init__(context)
@@ -24,6 +35,8 @@ class SSHExecuteShellPlugin(Star):
         self.key_path = self.config.get("key_path", "")
         self.password = self.config.get("password", "")
         self.timeout = self.config.get("timeout", 30)
+        # known_hosts: 留空=跳过校验，填路径=使用该文件
+        self.known_hosts = self.config.get("known_hosts", "")
         # 运行时状态
         self.conn = None          # SSH 连接
         self.proc = None          # 持久 bash 进程 (SSHClientProcess)
@@ -45,6 +58,12 @@ class SSHExecuteShellPlugin(Star):
             connect_kwargs["client_keys"] = [self.key_path]
         else:
             connect_kwargs["password"] = self.password
+
+        # known_hosts 处理：留空则跳过 host key 校验
+        if self.known_hosts:
+            connect_kwargs["known_hosts"] = self.known_hosts
+        else:
+            connect_kwargs["known_hosts"] = None
 
         self.conn = await asyncssh.connect(**connect_kwargs)
         self.proc = await self.conn.create_process("bash")
@@ -97,14 +116,16 @@ class SSHExecuteShellPlugin(Star):
     @filter.llm_tool(name="ssh_execute_shell")
     async def ssh_execute_shell(self, event: AstrMessageEvent, command: str):
         """
-        通过 SSH 在远程服务器上执行 shell 命令，返回命令执行结果。
-        目标服务器信息从插件配置中读取，无需在调用时指定。
-
-        注意：不支持交互式命令（如 top、vim、htop 等）。
+        执行一条 shell 命令，返回 stdout/stderr。不支持交互式命令。
+        仅限管理员使用。
 
         Args:
-            command (str): 必填 要在远程服务器上执行的 shell 命令
+            command (str): 要执行的 shell 命令
         """
+        # —— 管理员权限校验（仿照 astrbot 本体 shell 工具） ——
+        if permission_error := _check_admin(event, "SSH 远程命令执行"):
+            return permission_error
+
         # 检查连接是否就绪，首次访问时懒连接
         if not self.proc:
             try:
