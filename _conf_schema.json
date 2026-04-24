@@ -40,5 +40,11 @@
     "hint": "默认 30 秒",
     "type": "int",
     "default": 30
+  },
+  "known_hosts": {
+    "description": "known_hosts 文件路径。留空表示跳过 host key 校验（首次连接时推荐）；可设为系统路径（如 /root/.ssh/known_hosts）进行严格校验",
+    "hint": "留空 = 跳过校验，或填 /root/.ssh/known_hosts",
+    "type": "string",
+    "default": ""
   }
 }
