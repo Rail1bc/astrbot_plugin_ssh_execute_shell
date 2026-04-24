@@ -4,8 +4,8 @@
 
 [![AstrBot](https://img.shields.io/badge/AstrBot-4.0%2B-blue)](https://github.com/Soulter/AstrBot)
 [![Python](https://img.shields.io/badge/Python-3.9%2B-green)](https://www.python.org/)
-[![License](https://img.shields.io/badge/License-MIT-yellow)](LICENSE)
-[![Version](https://img.shields.io/badge/Version-1.1.0-orange)](https://github.com/Rail1bc/astrbot_plugin_ssh_execute_shell)
+[![License](https://img.shields.io/badge/License-AGPLv3-orange)](https://www.gnu.org/licenses/agpl-3.0.html)
+[![Version](https://img.shields.io/badge/Version-v1.0.0-brightgreen)](https://github.com/Rail1bc/astrbot_plugin_ssh_execute_shell)
 
 **让 LLM 通过 SSH 在远程服务器上执行 Shell 命令**
 
@@ -104,4 +104,4 @@ git clone https://github.com/Rail1bc/astrbot_plugin_ssh_execute_shell.git
 
 ## 📄 许可证
 
-本项目基于 MIT 许可证开源。
+本项目基于 **GNU Affero General Public License v3 (AGPLv3)** 开源。
