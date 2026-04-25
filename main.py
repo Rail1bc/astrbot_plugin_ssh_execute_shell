@@ -116,7 +116,7 @@ class SSHExecuteShellPlugin(Star):
     @filter.llm_tool(name="ssh_execute_shell")
     async def ssh_execute_shell(self, event: AstrMessageEvent, command: str):
         """
-        执行一条 shell 命令，返回 stdout/stderr。不支持交互式命令。
+        通过 SSH 在远程服务器上执行一条 shell 命令，返回 stdout/stderr。不支持交互式命令。
         仅限管理员使用。
 
         Args:
